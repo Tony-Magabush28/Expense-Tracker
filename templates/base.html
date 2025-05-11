@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .text-danger {
+            color: red;
+        }
+        .text-success {
+            color: green;
+        }
+        .text-info {
+            color: blue;
+        }
+
+        /* Light and Dark mode styles */
+        body.light-mode {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .flash-message {
+            margin: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body class="light-mode">
+
+    <!-- Flash Message with Category-Based Styling -->
+    <p class="flash-message {% if category == 'danger' %}text-danger{% elif category == 'success' %}text-success{% else %}text-info{% endif %}">
+        {{ message }}
+    </p>
+
+    <!-- Toggle Mode Button -->
+    <button id="toggle-mode">Toggle Dark/Light Mode</button>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="flash-message {% if category == 'danger' %}text-danger{% elif category == 'success' %}text-success{% else %}text-info{% endif %}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <script>
+        const toggleBtn = document.getElementById('toggle-mode');
+        const body = document.body;
+
+        // Check saved preference for dark/light mode
+        const mode = localStorage.getItem('mode');
+        if (mode) body.className = mode;
+
+        toggleBtn.onclick = () => {
+            body.classList.toggle('dark-mode');
+            body.classList.toggle('light-mode');
+            localStorage.setItem('mode', body.className);
+        };
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Transaction</h2>
+
+<!-- Transaction Form -->
+<form method="POST" style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
+    {{ form.hidden_tag() }}
+    
+    <!-- Amount Field -->
+    <div>
+        <label for="{{ form.amount.id }}">{{ form.amount.label }}</label>
+        {{ form.amount }}
+    </div><br>
+
+    <!-- Category Field -->
+    <div>
+        <label for="{{ form.category.id }}">{{ form.category.label }}</label>
+        {{ form.category }}
+    </div><br>
+
+    <!-- Type Field -->
+    <div>
+        <label for="{{ form.type.id }}">{{ form.type.label }}</label>
+        {{ form.type }}
+    </div><br>
+
+    <!-- Date Field -->
+    <div>
+        <label for="{{ form.date.id }}">{{ form.date.label }}</label>
+        {{ form.date }}
+    </div><br>
+
+    <!-- Submit Button -->
+    <div>
+        {{ form.submit }}
+    </div>
+</form>
+
+<!-- Back Link -->
+<p><a href="{{ url_for('dashboard') }}" style="text-decoration: none; color: #007bff;">Back to Dashboard</a></p>
+{% endblock %}
+

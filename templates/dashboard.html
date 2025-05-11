@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align:center;">DASHBOARD</h2>
+
+<!-- Summary Stats -->
+<div style="margin-bottom: 20px; text-align:center;">
+  <p><strong>Income:</strong> ₵{{ '%.2f' | format(income) }}</p>
+  <p><strong>Expense:</strong> ₵{{ '%.2f' | format(expense) }}</p>
+  <p><strong>Balance:</strong> ₵{{ '%.2f' | format(balance) }}</p>
+</div>
+
+<!-- Buttons -->
+<p style="text-align:center;">
+  <a href="{{ url_for('add_transaction') }}">➕ Add Transaction</a> |
+  <a href="{{ url_for('export_csv') }}">📁 Export CSV</a> |
+  <a href="{{ url_for('export_pdf') }}">📄 Export PDF</a>
+</p>
+
+<!-- Budget Form -->
+<form method="POST" action="{{ url_for('set_budget') }}" style="margin-top: 20px; text-align:center;">
+  <label><strong>Set Monthly Budget Limit:</strong></label>
+  <input type="number" name="budget_limit" step="0.01" value="{{ current_user.budget_limit or '' }}" required>
+  <button type="submit">Set</button>
+</form>
+
+<!-- Alert -->
+{% if alert %}
+  <div style="color:red; font-weight:bold; margin-top:10px; text-align:center;">{{ alert }}</div>
+{% endif %}
+
+<!-- Filters -->
+<h3 style="margin-top: 30px; text-align:center;">Filter Transactions</h3>
+<form method="GET" style="text-align:center;">
+  <label>Type:</label>
+  <select name="type">
+    <option value="">All</option>
+    <option value="Income" {% if request.args.get('type') == 'Income' %}selected{% endif %}>Income</option>
+    <option value="Expense" {% if request.args.get('type') == 'Expense' %}selected{% endif %}>Expense</option>
+  </select>
+  <label>Category:</label>
+  <input type="text" name="category" value="{{ request.args.get('category', '') }}">
+  <label>Start Date:</label>
+  <input type="date" name="start" value="{{ request.args.get('start', '') }}">
+  <label>End Date:</label>
+  <input type="date" name="end" value="{{ request.args.get('end', '') }}">
+  <input type="submit" value="Filter">
+</form>
+
+<!-- Chart -->
+<h3 style="margin-top: 30px; text-align:center;">Income vs Expense Chart</h3>
+{% if chart %}
+  <div style="text-align:center;">
+    <img src="data:image/png;base64,{{ chart }}" alt="Income vs Expense Pie Chart" style="max-width:100%; height:auto;">
+  </div>
+{% else %}
+  <p style="text-align:center;">No data available for chart.</p>
+{% endif %}
+
+<!-- Transaction Table -->
+<h3 style="margin-top: 30px; text-align:center;">Transaction History</h3>
+<table border="1" cellpadding="5" style="width:80%; margin-left:auto; margin-right:auto; border-collapse: collapse;">
+  <thead style="background-color: #f2f2f2;">
+    <tr>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Category</th>
+      <th>Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in transactions %}
+    <tr>
+      <td>{{ t.date }}</td>
+      <td>{{ t.type }}</td>
+      <td>{{ t.category }}</td>
+      <td>₵{{ '%.2f' | format(t.amount) }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" style="text-align:center;">No transactions found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
