@@ -1,15 +1,17 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
-import matplotlib.pyplot as plt
-import io
-import base64
-import csv
-from fpdf import FPDF
 from flask_migrate import Migrate
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
+from datetime import date
+import io
+import csv
+import base64
+import matplotlib.pyplot as plt
+from fpdf import FPDF
 import math
+
 from models import db, User, Transaction
 from forms import RegisterForm, LoginForm, TransactionForm
 
@@ -39,12 +41,26 @@ def index():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('Email already registered. Please log in or use a different email.', 'danger')
+            return redirect(url_for('register'))
+
         hashed_pw = generate_password_hash(form.password.data)
-        new_user = User(username=form.username.data, email=form.email.data, password=hashed_pw)
+        new_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_pw,
+            budget_limit=0.0
+        )
         db.session.add(new_user)
-        db.session.commit()
-        flash('Registered successfully!', 'success')
-        return redirect(url_for('login'))
+        try:
+            db.session.commit()
+            flash('Registered successfully!', 'success')
+            return redirect(url_for('login'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('An error occurred. Please try again.', 'danger')
     return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
